@@ -155,9 +155,9 @@ verLineSet = cell(1,length(locs));
 for i = 1 : length(locs)
     sBegin = locs(i)-floor(scoreInterval/2); if sBegin<1, sBegin=1; end
     sEnd = locs(i)+floor(scoreInterval/2); if sEnd>size(oriImg,1), sEnd=size(oriImg,1); end
-    verLineHis = sum(1-biImg(sBegin:sEnd,:));
-    verLine = zeros(1,size(biImg,2));
-    for j = 1 : size(biImg,2)
+    verLineHis = sum(1-imgAfterRemoveScoreLine(sBegin:sEnd,:));
+    verLine = zeros(1,size(imgAfterRemoveScoreLine,2));
+    for j = 1 : size(imgAfterRemoveScoreLine,2)
 % Find vertical line position in the histogram
         if verLineHis(j)>3.5*confirmSpace, verLine(j) = 1; end
     end
@@ -178,7 +178,7 @@ for i = 1 : length(locs)
     tverLineHis(~logical(verLine)) = 0;
 %     plot(tverLineHis)
 %     pause
-    trueVerLine = zeros(1,size(biImg,2));
+    trueVerLine = zeros(1,size(imgAfterRemoveScoreLine,2));
     while 1
 % Trimming the vertical lines that are too close to each other
         [mverLineVal, mverLineValIdx] = max(tverLineHis);
@@ -216,8 +216,8 @@ for i = 1 : length(locs)
         localStart = 1;
         localEnd = 1;
         gap = 0;
-        lineImg = biImg(sBegin:sEnd,verLine(j));
-%         shw = uint8(biImg(sBegin:sEnd,verLine(j)-2:verLine(j)+2))*255;
+        lineImg = imgAfterRemoveScoreLine(sBegin:sEnd,verLine(j));
+%         shw = uint8(imgAfterRemoveScoreLine(sBegin:sEnd,verLine(j)-2:verLine(j)+2))*255;
         for k = 2 : sEnd-sBegin+1
 %             tshw = shw;
 %             tshw(k,3) = 128;
@@ -283,7 +283,50 @@ for i = 1 : length(verLineSet)
     end
 end
 
+
 % Finding note region aside vertical line
+halfSpace = round(confirmSpace/2);
+regionSize = confirmSpace*confirmSpace;
+noteRegion = cell(1,length(verLineSet));
+for i = 1 : length(verLineSet)
+    noteRegion{i} = [];
+    for j = 1 : length(verLineSet{i})
+%         whole = imgAfterRemoveScoreLine(verLineSet{i}(j).begin-halfSpace:verLineSet{i}(j).end+halfSpace,verLineSet{i}(j).x-confirmSpace:verLineSet{i}(j).x+confirmSpace);
+        r1 = imgAfterRemoveScoreLine(verLineSet{i}(j).begin-halfSpace:verLineSet{i}(j).begin+halfSpace,verLineSet{i}(j).x-confirmSpace:verLineSet{i}(j).x);
+        r2 = imgAfterRemoveScoreLine(verLineSet{i}(j).begin-halfSpace:verLineSet{i}(j).begin+halfSpace,verLineSet{i}(j).x:verLineSet{i}(j).x+confirmSpace);
+        r3 = imgAfterRemoveScoreLine(verLineSet{i}(j).end-halfSpace:verLineSet{i}(j).end+halfSpace,verLineSet{i}(j).x-confirmSpace:verLineSet{i}(j).x);
+        r4 = imgAfterRemoveScoreLine(verLineSet{i}(j).end-halfSpace:verLineSet{i}(j).end+halfSpace,verLineSet{i}(j).x:verLineSet{i}(j).x+confirmSpace);
+%         subplot(3,3,1);imshow(r1)
+%         subplot(3,3,3);imshow(r2)
+%         subplot(3,3,5);imshow(whole)
+%         subplot(3,3,7);imshow(r3)
+%         subplot(3,3,9);imshow(r4)
+%         pause
+        r1p = [verLineSet{i}(j).begin-halfSpace verLineSet{i}(j).begin+halfSpace verLineSet{i}(j).x-confirmSpace verLineSet{i}(j).x];
+        r2p = [verLineSet{i}(j).begin-halfSpace verLineSet{i}(j).begin+halfSpace verLineSet{i}(j).x verLineSet{i}(j).x+confirmSpace];
+        r3p = [verLineSet{i}(j).end-halfSpace verLineSet{i}(j).end+halfSpace verLineSet{i}(j).x-confirmSpace verLineSet{i}(j).x];
+        r4p = [verLineSet{i}(j).end-halfSpace verLineSet{i}(j).end+halfSpace verLineSet{i}(j).x verLineSet{i}(j).x+confirmSpace];
+        noteRigCan = [r1p; r2p; r3p; r4p];
+        [minR, minRIdx] = min([mean(mean(r1)) mean(mean(r2)) mean(mean(r3)) mean(mean(r4))]);
+        if minR>0.5
+            disp('bar')
+        else
+            noteRegion{i} = [noteRegion{i}; noteRigCan(minRIdx,:)];
+        end
+    end
+end
+
+% Show the result after note finding
+imshow(biImg)
+hold on
+for i = 1 : length(verLineSet)
+    for j = 1 : size(noteRegion{i},1)
+        y = (noteRegion{i}(j,1)+noteRegion{i}(j,2))/2;
+        x = (noteRegion{i}(j,3)+noteRegion{i}(j,4))/2;
+        plot(x,y,'ro')
+    end
+end
+hold off
 
 output = scoreLines;
 

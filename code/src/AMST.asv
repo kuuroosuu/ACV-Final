@@ -217,12 +217,12 @@ for i = 1 : length(locs)
         localEnd = 1;
         gap = 0;
         lineImg = biImg(sBegin:sEnd,verLine(j));
-%         shw = uint8(biImg(sBegin:sEnd,verLine(j)-2:verLine(j)+2))*255;
+        shw = uint8(biImg(sBegin:sEnd,verLine(j)-2:verLine(j)+2))*255;
         for k = 2 : sEnd-sBegin+1
-%             tshw = shw;
-%             tshw(k,3) = 128;
-%             imshow(tshw)
-%             hold on
+            tshw = shw;
+            tshw(k,3) = 128;
+            imshow(tshw)
+            hold on
             if ~lineImg(k)
                 localEnd = localEnd+1;
                 gap = 0;
@@ -273,17 +273,17 @@ for i = 1 : length(locs)
 %     verLinePos(noInclude) = [];
 %     if length(verLinePos)<tmp, disp('trim');end
 
+
     verLineSet{i} = verLinePos;
 end
 
-% Plotting the final vertical lines
+
+
 for i = 1 : length(verLineSet)
     for j = 1 : length(verLineSet{i})
         line([verLineSet{i}(j).x verLineSet{i}(j).x],[verLineSet{i}(j).begin verLineSet{i}(j).end])
     end
 end
-
-% Finding note region aside vertical line
 
 output = scoreLines;
 

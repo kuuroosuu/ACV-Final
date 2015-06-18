@@ -283,6 +283,52 @@ for i = 1 : length(verLineSet)
     end
 end
 
+% Finding if two notes are connected
+connectedPartSet = cell(1,length(verLineSet));
+% Initialization
+for i = 1 : length(verLineSet)
+    for j = 1 : length(verLineSet{i})
+        connectedPartSet{i}(j).lt = 0;
+        connectedPartSet{i}(j).rt = 0;
+        connectedPartSet{i}(j).lb = 0;
+        connectedPartSet{i}(j).rb = 0;
+    end
+end
+for i = 1 : length(verLineSet)
+    for j = 1 : length(verLineSet{i})
+%         Having connection with right note?
+        if j < length(verLineSet{i})
+            BW = 1-imgAfterRemoveScoreLine(min(verLineSet{i}(j).begin,verLineSet{i}(j+1).begin)-2:max(verLineSet{i}(j).end,verLineSet{i}(j+1).end)+2, verLineSet{i}(j).x:verLineSet{i}(j+1).x);
+            CC = bwconncomp(BW);
+            isConnected = 0;
+%             One connected component usually has connection
+            if CC.NumObjects == 1
+               isConnected = 1;
+            else
+%                 Or has strong enough horizontal line
+                horHist = sum(BW,2);
+                if sum(horHist>size(BW,2)*0.9)
+                    isConnected = 1;
+                end
+            end
+            if isConnected
+                BW = BW(:, ceil(size(BW,2)*(1/2-1/5)):floor(size(BW,2)*(1/2+1/5)));
+                topPart = sum(BW(1:round(size(BW,1)/2),:));
+                downPart = sum(BW)-topPart;
+                if topPart>downPart
+%                     Top connection
+                    connectedPartSet{i}(j).rt = 1;
+                    connectedPartSet{i}(j+1).lt = 1;
+                else
+%                     Button connection
+                    connectedPartSet{i}(j).rb = 1;
+                    connectedPartSet{i}(j+1).lb = 1;
+                end
+            end
+        end
+    end
+end
+
 
 % Finding note region aside vertical line
 halfSpace = round(confirmSpace/2);
@@ -291,6 +337,7 @@ noteRegion = cell(1,length(verLineSet));
 for i = 1 : length(verLineSet)
     noteRegion{i} = [];
     for j = 1 : length(verLineSet{i})
+%         Region of four corners
 %         whole = imgAfterRemoveScoreLine(verLineSet{i}(j).begin-halfSpace:verLineSet{i}(j).end+halfSpace,verLineSet{i}(j).x-confirmSpace:verLineSet{i}(j).x+confirmSpace);
         r1 = imgAfterRemoveScoreLine(verLineSet{i}(j).begin-halfSpace:verLineSet{i}(j).begin+halfSpace,verLineSet{i}(j).x-confirmSpace:verLineSet{i}(j).x);
         r2 = imgAfterRemoveScoreLine(verLineSet{i}(j).begin-halfSpace:verLineSet{i}(j).begin+halfSpace,verLineSet{i}(j).x:verLineSet{i}(j).x+confirmSpace);
@@ -302,16 +349,22 @@ for i = 1 : length(verLineSet)
 %         subplot(3,3,7);imshow(r3)
 %         subplot(3,3,9);imshow(r4)
 %         pause
+%         Four vertexs of region
         r1p = [verLineSet{i}(j).begin-halfSpace verLineSet{i}(j).begin+halfSpace verLineSet{i}(j).x-confirmSpace verLineSet{i}(j).x];
         r2p = [verLineSet{i}(j).begin-halfSpace verLineSet{i}(j).begin+halfSpace verLineSet{i}(j).x verLineSet{i}(j).x+confirmSpace];
         r3p = [verLineSet{i}(j).end-halfSpace verLineSet{i}(j).end+halfSpace verLineSet{i}(j).x-confirmSpace verLineSet{i}(j).x];
         r4p = [verLineSet{i}(j).end-halfSpace verLineSet{i}(j).end+halfSpace verLineSet{i}(j).x verLineSet{i}(j).x+confirmSpace];
-        noteRigCan = [r1p; r2p; r3p; r4p];
-        [minR, minRIdx] = min([mean(mean(r1)) mean(mean(r2)) mean(mean(r3)) mean(mean(r4))]);
+        noteRegCan = [r1p; r2p; r3p; r4p];
+        regStrength = [mean(mean(r1)) mean(mean(r2)) mean(mean(r3)) mean(mean(r4))];
+        if connectedPartSet{i}(j).lt, regStrength(1) = inf; end
+        if connectedPartSet{i}(j).rt, regStrength(2) = inf; end
+        if connectedPartSet{i}(j).lb, regStrength(3) = inf; end
+        if connectedPartSet{i}(j).rb, regStrength(4) = inf; end
+        [minR, minRIdx] = min(regStrength);
         if minR>0.5
             disp('bar')
         else
-            noteRegion{i} = [noteRegion{i}; noteRigCan(minRIdx,:)];
+            noteRegion{i} = [noteRegion{i}; noteRegCan(minRIdx,:)];
         end
     end
 end

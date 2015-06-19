@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getlocation</title>
+  <meta name="keywords" content="getlocation">
+  <meta name="description" content="GETLOCATION Find peaks or valleys location to search best pitch marks.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">pitchmark</a> &gt; getlocation.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for pitchmark&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>getlocation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GETLOCATION Find peaks or valleys location to search best pitch marks.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function sampleIndex = getlocation(y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, plotopt) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">GETLOCATION Find peaks or valleys location to search best pitch marks.
+   Usage : sampleIndex = getlocation(y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, plotopt)
+   Selfdemo : getlocation;
+   
+ Cheng-Yuan Lin</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="pitchmarkdp.html" class="code" title="function pitchmarks = pitchmarkdp(y, fs, plotopt, pmarkParam)">pitchmarkdp</a>	PITCHMARKDP Pitch marking based on Dynamic Programming.</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)</a></li><li><a href="#_sub2" class="code">function selfdemo</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sampleIndex = getlocation(y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, plotopt)</a>
+0002 
+0003 <span class="comment">%GETLOCATION Find peaks or valleys location to search best pitch marks.</span>
+0004 <span class="comment">%   Usage : sampleIndex = getlocation(y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, plotopt)</span>
+0005 <span class="comment">%   Selfdemo : getlocation;</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Cheng-Yuan Lin</span>
+0008 
+0009 <span class="keyword">if</span> nargin &lt;5, plotopt = 0; <span class="keyword">end</span>;
+0010 <span class="keyword">if</span> nargin &lt;3, maxPeriod = 0.007; minPeriod = 0.0065; plotopt = 1; <span class="keyword">end</span>;
+0011 <span class="keyword">if</span> nargin==0, <a href="#_sub2" class="code" title="subfunction selfdemo">selfdemo</a>; <span class="keyword">return</span>; <span class="keyword">end</span>;
+0012 
+0013 Xdistscale    = 20;  <span class="comment">%»P³Ì¤pÂIªºx­È¶ZÂ÷ +- 20­ÓÂI¤~±µ¨ü</span>
+0014 Ydistscale    = 0.2; <span class="comment">%»P³Ì¤pÂIªºy­È¶ZÂ÷¤Ö©ó0.2¤~±µ¨ü, ¦¹­È¬°normalized¤§°Ñ¼Æ</span>
+0015 
+0016 <span class="keyword">if</span> PorV == 0, <span class="comment">%0 for peaks</span>
+0017    [junk, pmark] = max(y);
+0018 <span class="keyword">else</span> <span class="comment">%1 for valleys</span>
+0019    [junk, pmark] = min(y);
+0020 <span class="keyword">end</span>;
+0021 
+0022 minYhead = pmark-50; <span class="keyword">if</span> minYhead &lt;= 0, minYhead = 1; <span class="keyword">end</span>;
+0023 minYtail = pmark+50; <span class="keyword">if</span> minYtail &gt; length(y), minYtail = length(y); <span class="keyword">end</span>;
+0024 sampleIndex   = <a href="#_sub1" class="code" title="subfunction tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)">getIndex</a>(y(minYhead:minYtail), minYhead, minYtail, candNum, Xdistscale, Ydistscale, PorV);
+0025 singlePeriod  = (fs/pitch);
+0026 
+0027 <span class="comment">%©¹«á§ä</span>
+0028 <span class="keyword">while</span> (1),
+0029    currentIndex = sampleIndex(<span class="keyword">end</span>, 1);
+0030    minIndex = currentIndex+floor(minPeriod*fs);
+0031    maxIndex = currentIndex+ceil(maxPeriod*fs);
+0032    <span class="keyword">if</span> maxIndex &gt;= length(y) ,
+0033       <span class="keyword">if</span> (length(y)- sampleIndex(<span class="keyword">end</span>, 1)) &gt; singlePeriod, <span class="comment">%°²¦p³Ì«á¤@­Ópitch mark­È¤Ó¤p</span>
+0034          begin = sampleIndex(<span class="keyword">end</span>, 1) + round(singlePeriod/2);
+0035          candidateY = y(begin : end);
+0036          tempIndex = <a href="#_sub1" class="code" title="subfunction tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)">getIndex</a>(candidateY, begin, length(y), candNum, Xdistscale, Ydistscale, PorV);
+0037          sampleIndex = [sampleIndex; tempIndex];
+0038       <span class="keyword">end</span>;
+0039       <span class="keyword">break</span>; 
+0040    <span class="keyword">end</span>;
+0041    candidateY = y(minIndex:maxIndex);
+0042    tempIndex = <a href="#_sub1" class="code" title="subfunction tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)">getIndex</a>(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV);
+0043    sampleIndex = [sampleIndex; tempIndex];
+0044 <span class="keyword">end</span>;
+0045 
+0046 <span class="comment">%©¹«e§ä</span>
+0047 <span class="keyword">while</span> (1)
+0048    currentIndex = sampleIndex(1, 1);
+0049    maxIndex = currentIndex-floor(minPeriod*fs);
+0050    minIndex = currentIndex-ceil(maxPeriod*fs);
+0051    <span class="keyword">if</span> minIndex &lt;= 0 , <span class="comment">%¥i¯àÁÙ¦³³Ì«á¤@­Ópitch mark¦b¦¹</span>
+0052       <span class="keyword">if</span> sampleIndex(1, 1) &gt; singlePeriod, <span class="comment">%°²¦p¥Ø«e²Ä¤@­Ópitch mark­È¤j©ó¦¹­È</span>
+0053          tail = sampleIndex(1, 1) - round(singlePeriod/2);
+0054          candidateY = y(1:tail);
+0055          tempIndex = <a href="#_sub1" class="code" title="subfunction tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)">getIndex</a>(candidateY, 1, tail, candNum, Xdistscale, Ydistscale, PorV);
+0056          sampleIndex = [tempIndex; sampleIndex];
+0057       <span class="keyword">end</span>;
+0058       <span class="keyword">break</span>;
+0059    <span class="keyword">end</span>;
+0060    candidateY = y(minIndex:maxIndex);
+0061    tempIndex = <a href="#_sub1" class="code" title="subfunction tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)">getIndex</a>(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV);
+0062    sampleIndex = [tempIndex; sampleIndex];
+0063 <span class="keyword">end</span>;
+0064 
+0065 sampleIndex = sampleIndex';
+0066 
+0067 <span class="comment">% ===========Plot figure</span>
+0068 <span class="keyword">if</span> plotopt,
+0069    figure;
+0070    pmark = sampleIndex(1, 1:end-1);
+0071    subplot(2,1,1);plot((1:length(y)), y, <span class="string">'.-'</span>);
+0072    <span class="comment">%µe¥X pitch mark</span>
+0073    <span class="keyword">for</span> i=1:length(pmark),
+0074       line(pmark(i), y(pmark(i)), <span class="string">'marker'</span>, <span class="string">'o'</span>, <span class="string">'color'</span>, <span class="string">'r'</span>);
+0075    <span class="keyword">end</span>
+0076    axis([-inf inf -1 1]);
+0077    axis([0.1 0.8 -1 1]);
+0078    ylabel(<span class="string">'Amplitude'</span>);
+0079    title(<span class="string">'Wave form'</span>);
+0080    axis tight;
+0081    legend(<span class="string">'wave'</span>,<span class="string">'pitch marks'</span>);
+0082    
+0083    subplot(2,1,2);
+0084    dpmark = diff(pmark);
+0085    pitch = fs./dpmark;
+0086    plot(pitch, <span class="string">'ro-'</span>);
+0087 <span class="keyword">end</span>;
+0088 
+0089 
+0090 <a name="_sub1" href="#_subfunctions" class="code">function tempIndex = getIndex(candidateY, minIndex, maxIndex, candNum, Xdistscale, Ydistscale, PorV)</a>
+0091 
+0092 <span class="keyword">if</span> PorV == 0,
+0093    [value, idx] = localmax(candidateY);
+0094 <span class="keyword">else</span> <span class="comment">% PorV == 1,</span>
+0095    [value, idx] = localmin(candidateY);
+0096 <span class="keyword">end</span>;
+0097 
+0098 <span class="comment">%­Y¬°ªÅ¶°¦X, «h§ä¤¤¤ßÂI´À¥N</span>
+0099 <span class="keyword">if</span> isempty(idx), 
+0100    idx = round((minIndex + maxIndex)/2 - minIndex);
+0101    value = candidateY(idx);
+0102 <span class="keyword">end</span>;
+0103 
+0104 <span class="comment">%§ä¨ì³Ì§CÂI(§Ypitch mark³Ì¦³¥i¯à¤§¦ì¸m), ºÉ¶q§ä¨ìcandNum­Ó²Å¦Xªº±ø¥óÂI</span>
+0105 dist = abs(value - value(1));
+0106 dist = dist/( max(candidateY) - min(candidateY)); <span class="comment">%Normalized.</span>
+0107 idx   = idx(find(dist &lt; Ydistscale));
+0108 Index = idx(1);
+0109 range = [Index - Xdistscale : Index + Xdistscale];
+0110 idx = idx(find(ismember(idx, range)));
+0111 
+0112 <span class="comment">%°²¦pidxªº­Ó¼Æ¹L¦h(¶W¹LcandNum©Ò«ü©w), «h¥HcandNum¬°¥D</span>
+0113 plen = length(idx);
+0114 <span class="keyword">if</span> plen&gt;candNum, plen = candNum; <span class="keyword">end</span>;
+0115 tempIndex = minIndex+idx(1:plen)-1;
+0116 <span class="keyword">if</span> length(tempIndex)&lt; candNum,
+0117    cnts = candNum - length(tempIndex);
+0118    tempIndex = [tempIndex tempIndex(end)*ones(1, cnts)];
+0119 <span class="keyword">end</span>;
+0120 
+0121 
+0122 <a name="_sub2" href="#_subfunctions" class="code">function selfdemo</a>
+0123 wavefile = <span class="string">'la.wav'</span>;
+0124 plotopt = 0;
+0125 <span class="comment">% ====== Read wavefile</span>
+0126 [y,fs] = wavread(wavefile);
+0127 y = y-mean(y);
+0128 <span class="comment">% ====== Endpoint detection</span>
+0129 y = y(3900:7300);
+0130 <span class="comment">%======== Pitch tracking</span>
+0131 [p0, p1, p2, p3, p4] = wave2pitch(y,fs,0);
+0132 p2 = p2(find(p2~=0));
+0133 pitch = nanmedian(p2);
+0134 <span class="keyword">if</span> isempty(p2) | isempty(pitch), 
+0135    fprintf(<span class="string">'The wavefile has some problems!\n'</span>);
+0136    <span class="keyword">return</span>;
+0137 <span class="keyword">end</span>;
+0138 pitch = smtn2frq(pitch);
+0139 a = (1/pitch);
+0140 b = a*0.5;
+0141 maxPeriod = a + b;
+0142 minPeriod = a - b;
+0143 pitch = mean(pitch);
+0144 candNum = 3;
+0145 PorV    = 1;
+0146 sampleIndex = feval(mfilename, y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, 1);</pre></div>
+<hr><address>Generated on Tue 21-Aug-2007 22:52:24 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

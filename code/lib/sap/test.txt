@@ -1,0 +1,5 @@
+localMinCount=20, localMinIndex[0]=6, localMinIndex[1]=14
+localMinCount before packing=20
+minPitch=30.000000, maxPitch=84.000000
+fs=16000, minPeriod=15, maxPeriod=346
+localMinCount after packing=18

@@ -1,5 +1,6 @@
-function [ output ] = AMST( fileName )
+function AMST( fileName )
 
+addpath ../lib/sap
 if ~exist('fileName','var'), fileName = '../media/img2.jpg'; end
 
 % Input score image
@@ -148,7 +149,7 @@ for i = 1 : length(scoreLines)
     end
 end
 imshow(imgAfterRemoveScoreLine)
-pause
+% pause
 
 % Find the vertical lines
 verLineSet = cell(1,length(locs));
@@ -361,10 +362,10 @@ for i = 1 : length(verLineSet)
         if connectedPartSet{i}(j).lb, regStrength(3) = inf; end
         if connectedPartSet{i}(j).rb, regStrength(4) = inf; end
         [minR, minRIdx] = min(regStrength);
-        if minR>0.5
-            disp('bar')
-        else
+        if minR<0.5
             noteRegion{i} = [noteRegion{i}; noteRegCan(minRIdx,:)];
+            
+%             else is bar
         end
     end
 end
@@ -381,7 +382,24 @@ for i = 1 : length(verLineSet)
 end
 hold off
 
-output = scoreLines;
+% Make music sound
+pitch = [];
+duration = [];
+for i = 1 : length(verLineSet)
+    baseLine = scoreLines{i}(1);
+    for j = 1 : size(noteRegion{i},1)
+        y = (noteRegion{i}(j,1)+noteRegion{i}(j,2))/2;
+        pitch = [pitch 64+round((-y+baseLine)/(confirmSpace/2))];
+        if connectedPartSet{i}(j).lt || connectedPartSet{i}(j).rt || connectedPartSet{i}(j).lb || connectedPartSet{i}(j).rb
+            duration = [duration 1];
+        else
+            duration = [duration 2];
+        end
+    end
+end
+note = [pitch; duration]; note=note(:)';
+wave = note2wave(note, 1, 16000);
+wavwrite(wave, 16000, 16, 'result.wav')
 
 end
 

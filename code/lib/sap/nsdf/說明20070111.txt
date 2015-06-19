@@ -1,0 +1,32 @@
+nsdf pitch tracking包含下列三個檔案:
+myframe2nsdf.m: 將frame轉為nsdf
+myNsdf2pitch.m: 根據nsdf算出pitch和清澈度
+myFrame2pitch.m: 
+	回傳一個frame的音高
+	音量低於門檻值的音高設為0
+	清澈度低於0.85的音高設為0
+
+
+辨識的部分是修改老師上課的作業 pitchlabelprogram.rar 裡的檔案
+setPitchParam.m: 
+	修改的部分只有 PP.frame2pitchFcn='myFrame2pitch';
+wave2pitch.m: 
+	1. 修改了音量門檻值PP.volTh=mean(volume)-0.8*var(volume)^0.5;  
+	2. plotOpt = 0;
+	3. save pitch的uicontrol去掉（因為沒有要拿來標音..只是要看一下圖而已）
+
+執行步驟：
+1. 設定 go.m 裡的 waveDir後，開始執行 pitch tracking
+   結果會在 wave 檔的同一個地方產生 filename.Pnsdf 的檔案
+2. 設定goComparePV.m 裡的 waveDir
+   會抓wave所在目錄的 pv檔和 Pnsdf檔，分別是人工標示和NSDF標示的音高
+   並開始比對每點的音高，並畫出0~20個辦音的辨識率
+
+
+其他：
+showpool.m
+會讀進allscore.mat（已經事先跑完了）
+包含每首歌的分數，分數算法是從高銘陽學長的程式裡的公式
+（100減兩個pitch vector的距離除以點數）
+會從最低分的檔案開始把nsdf人工標示音高和電腦計算音高畫出來
+這是用來分析錯誤發生在什麼情況的時候用的

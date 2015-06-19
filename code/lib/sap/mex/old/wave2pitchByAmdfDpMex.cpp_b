@@ -1,0 +1,86 @@
+#include <string.h>
+#include <math.h>
+#include "mex.h"
+#include "d:/users/jang/c/lib/audio.h"
+
+/* Input Arguments */
+#define	WAVE			prhs[0]
+#define	FS			prhs[1]
+#define	NBITS			prhs[2]
+#define	FRAMESIZE		prhs[3]
+#define	OVERLAP			prhs[4]
+#define SMDFWEIGHT		prhs[5]
+#define INDEXDIFFWEIGHT		prhs[6]
+#define DPMETHOD		prhs[7]
+#define DPPOSDIFFORDER		prhs[8]
+#define DPUSELOCALOPTIM		prhs[9]
+/* Output Arguments */
+#define	PITCH	plhs[0]
+#define	SMDFMAT	plhs[1]
+
+void mexFunction(
+	int nlhs,	mxArray *plhs[],
+	int nrhs, const mxArray *prhs[])
+{
+	double	*wave, *smdfMat, *pitch, *outPitch;
+	int i, waveLen, *waveInt, *smdfMatInt;
+	char message[200];
+
+	/* Check for proper number of arguments */
+	if ((nrhs!=5) && (nrhs!=7) && (nrhs!=9) && (nrhs!=10)){
+		sprintf(message, "Format error!\nUsage 1: out = %s(wave, fs, nbits, frameSize, overlap)\nUsage 2: out = %s(wave, fs, nbits, frameSize, overlap, smdfWeight, indexDiffWeight)\nUsage 3: out = %s(wave, fs, nbits, frameSize, overlap, smdfWeight, indexDiffWeight, dpMethod, dpPosDiffOrder)\nUsage 4: out = %s(wave, fs, nbits, frameSize, overlap, smdfWeight, indexDiffWeight, dpMethod, dpPosDiffOrder, dpUseLocalOptim)", mexFunctionName(), mexFunctionName(), mexFunctionName(), mexFunctionName());
+		mexErrMsgTxt(message);
+	}
+
+	waveLen = mxGetM(WAVE)*mxGetN(WAVE);
+	wave = mxGetPr(WAVE);
+	int fs = (int)mxGetScalar(FS);
+	int nbits = (int)mxGetScalar(NBITS);
+	int frameSize = (int)mxGetScalar(FRAMESIZE);
+	int overlap = (int)mxGetScalar(OVERLAP);
+	if ((-1<=vecMax(wave, waveLen)) && (vecMax(wave, waveLen)<=1)){
+		sprintf(message, "Error: The input wave should be transformed into integers in the range [-128, 127] or [-32768, 32767].\n");
+		mexErrMsgTxt(message);
+	}
+	
+	
+	// Create parameters for pitch tracking
+	PITCHPARAM PP; ptParamSet(&PP, frameSize, overlap, fs, nbits);
+	if (nrhs>5){
+		PP.smdfWeight=(int)mxGetScalar(SMDFWEIGHT);
+		PP.indexDiffWeight=(int)mxGetScalar(INDEXDIFFWEIGHT);
+	}
+	if (nrhs>7){
+		PP.dpMethod=(int)mxGetScalar(DPMETHOD);
+		PP.dpPosDiffOrder=(int)mxGetScalar(DPPOSDIFFORDER);
+	}
+	if (nrhs>9){
+		PP.dpUseLocalOptim=(int)mxGetScalar(DPUSELOCALOPTIM);
+	}
+//	ptParamPrint(PP);	// 印不出來！
+//	mexPrintf("PP.frameSize=%d\n", PP.frameSize);
+//	mexPrintf("PP.overlap=%d\n", PP.overlap);
+//	mexPrintf("PP.indexDiffWeight=%d\n", PP.indexDiffWeight);
+//	mexPrintf("PP.smdfWeight=%d\n", PP.smdfWeight);
+	
+	// ====== 決定 frameNum
+	int frameNum=getFrameNum2(waveLen, PP.frameSize, PP.overlap);
+	int smdfLen=frameSize/2;
+	waveInt = (int *)malloc(waveLen*sizeof(int));
+	double2intVec(wave, waveLen, waveInt);
+	smdfMatInt = (int *)malloc(smdfLen*frameNum*sizeof(int));
+
+	// Output matrix
+	PITCH = mxCreateDoubleMatrix(1, frameNum, mxREAL);
+	pitch = mxGetPr(PITCH);
+	SMDFMAT = mxCreateDoubleMatrix(smdfLen, frameNum, mxREAL);
+	smdfMat = mxGetPr(SMDFMAT);
+	
+	// Pitch tracking by DP
+	wave2pitchByDp(waveInt, waveLen, PP, pitch);
+	int2doubleVec(smdfMatInt, smdfLen*frameNum, smdfMat);
+
+	// Free memory
+	free(waveInt);
+	free(smdfMatInt);
+}

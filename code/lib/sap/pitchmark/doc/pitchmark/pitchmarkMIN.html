@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of pitchmarkMIN</title>
+  <meta name="keywords" content="pitchmarkMIN">
+  <meta name="description" content="PITCHMARKMIN Pitch Mark MIN">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">pitchmark</a> &gt; pitchmarkMIN.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for pitchmark&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>pitchmarkMIN
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PITCHMARKMIN Pitch Mark MIN</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">PITCHMARKMIN Pitch Mark MIN
+   Usage : pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt)
+   Selfdemo : pitchmarkMIN;
+   
+   The follwoing example shows how to use this function.
+
+   a = (1/pitch);
+   b = a*0.5;
+   maxPeriod = a + b;
+   minPeriod = a - b;
+   plotopt = 1;
+   pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, plotopt);</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="plotpitchmarks.html" class="code" title="function plotpitchmarks(y, fs, pitchmarks, SFS_pitchcurve, AXISsetting1, AXISsetting2)">plotpitchmarks</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="getpmarkParam.html" class="code" title="function  pmarkParam = getpmarkParam(y, fs, plotopt, SFS_pitchcurve)">getpmarkParam</a>	GETPMARKPARAM Get parameters for pitch marking function.</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function selfdemo</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt)</a>
+0002 
+0003 <span class="comment">%PITCHMARKMIN Pitch Mark MIN</span>
+0004 <span class="comment">%   Usage : pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt)</span>
+0005 <span class="comment">%   Selfdemo : pitchmarkMIN;</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%   The follwoing example shows how to use this function.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%   a = (1/pitch);</span>
+0010 <span class="comment">%   b = a*0.5;</span>
+0011 <span class="comment">%   maxPeriod = a + b;</span>
+0012 <span class="comment">%   minPeriod = a - b;</span>
+0013 <span class="comment">%   plotopt = 1;</span>
+0014 <span class="comment">%   pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, plotopt);</span>
+0015 
+0016 
+0017 <span class="keyword">if</span> nargin &lt;6, plotopt = 0; <span class="keyword">end</span>;
+0018 <span class="keyword">if</span> nargin &lt;4, maxPeriod = 0.007; minPeriod = 0.0065; SFS_pitchcurve = 200; plotopt = 1; <span class="keyword">end</span>;
+0019 <span class="keyword">if</span> nargin==0, <a href="#_sub1" class="code" title="subfunction selfdemo">selfdemo</a>; <span class="keyword">return</span>; <span class="keyword">end</span>;
+0020 
+0021 pitch = 1/((maxPeriod+minPeriod)/2); <span class="comment">%¥i¦ôºâ­ì¨Ópitch</span>
+0022 
+0023 <span class="comment">% =====¥ý§ä¥X³Ì¤p­Èªºy</span>
+0024 [junk, pitchmarks] = min(y);
+0025 <span class="comment">%©¹«á§äN­Ó pitch marks</span>
+0026 <span class="keyword">while</span> (1),
+0027    currentIndex = pitchmarks(end);
+0028    minIndex = currentIndex+floor(minPeriod*fs);
+0029    maxIndex = currentIndex+ceil(maxPeriod*fs);
+0030    <span class="keyword">if</span> maxIndex &gt;= length(y) ,
+0031       <span class="keyword">if</span> (length(y)- pitchmarks(end)) &gt; (fs/pitch), <span class="comment">%°²¦p³Ì«á¤@­Ópitch mark­È¤Ó¤p</span>
+0032          begin = pitchmarks(end)+ round((fs/pitch)/2);
+0033          candidateY = y(begin : end);
+0034          [junk, newIndex] = min(candidateY);
+0035          pitchmarks = [pitchmarks, begin+newIndex-1];
+0036       <span class="keyword">end</span>;
+0037       <span class="keyword">break</span>; 
+0038    <span class="keyword">end</span>;
+0039    candidateY = y(minIndex:maxIndex);
+0040    [junk, newIndex] = min(candidateY);
+0041    pitchmarks = [pitchmarks, minIndex+newIndex-1];
+0042 <span class="keyword">end</span>
+0043 <span class="comment">%©¹«e§äM­Ó pitch marks</span>
+0044 <span class="keyword">while</span> (1)
+0045    currentIndex = pitchmarks(1);
+0046    maxIndex = currentIndex-floor(minPeriod*fs);
+0047    minIndex = currentIndex-ceil(maxPeriod*fs);
+0048    <span class="keyword">if</span> minIndex &lt;= 0 , <span class="comment">%¥i¯àÁÙ¦³³Ì«á¤@­Ópitch mark¦b¦¹</span>
+0049       <span class="keyword">if</span> pitchmarks(1) &gt; (fs/pitch), <span class="comment">%°²¦p¥Ø«e²Ä¤@­Ópitch mark­È¤j©ó¦¹­È</span>
+0050          tail = pitchmarks(1) - round((fs/pitch)/2);
+0051          candidateY = y(1:tail);
+0052          [junk, newIndex] = min(candidateY);
+0053          pitchmarks = [newIndex, pitchmarks];
+0054       <span class="keyword">end</span>;
+0055       <span class="keyword">break</span>;
+0056    <span class="keyword">end</span>;
+0057    candidateY = y(minIndex:maxIndex);
+0058    [junk, newIndex] = min(candidateY);
+0059    pitchmarks = [minIndex+newIndex-1, pitchmarks];
+0060 <span class="keyword">end</span>
+0061 
+0062 <span class="comment">%­×¥¿pitch markªº¥i¯à¿ù»~</span>
+0063 pitchmarks((diff(pitchmarks)==0)) = [];
+0064 
+0065 <span class="keyword">if</span> plotopt,   
+0066    <a href="plotpitchmarks.html" class="code" title="function plotpitchmarks(y, fs, pitchmarks, SFS_pitchcurve, AXISsetting1, AXISsetting2)">plotpitchmarks</a>(y, fs, pitchmarks, SFS_pitchcurve);
+0067 <span class="keyword">end</span>;
+0068 
+0069 
+0070 <span class="comment">% ============================================================== %</span>
+0071 <span class="comment">% selfdemo</span>
+0072 <span class="comment">% ============================================================== %</span>
+0073 <a name="_sub1" href="#_subfunctions" class="code">function selfdemo</a>
+0074 wavefile = <span class="string">'E:\test.wav'</span>;
+0075 plotopt  = 1;
+0076 [y, fs] = wavread(wavefile);
+0077 
+0078 <span class="comment">% ­pºâ pitch</span>
+0079 SFS_pitchcurve = wave2pitch_SFS(wavefile);
+0080 SFS_pitchcurve((SFS_pitchcurve&lt;50 | SFS_pitchcurve&gt;600)) = [];
+0081 <span class="keyword">if</span> isempty(SFS_pitchcurve), error(<span class="string">'Pitch is not available!'</span>); <span class="keyword">end</span>;
+0082 
+0083 <span class="comment">% µ¹©w pitchmarkMIN °Ñ¼Æ</span>
+0084 PitchMean = mean(SFS_pitchcurve);
+0085 a = (1/PitchMean);
+0086 b = a*0.5;
+0087 maxPeriod = a + b;
+0088 minPeriod = a - b;
+0089 pitchmarks = feval(mfilename, y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt);</pre></div>
+<hr><address>Generated on Tue 21-Aug-2007 22:52:24 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

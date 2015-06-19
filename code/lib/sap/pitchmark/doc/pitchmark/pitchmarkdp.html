@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of pitchmarkdp</title>
+  <meta name="keywords" content="pitchmarkdp">
+  <meta name="description" content="PITCHMARKDP Pitch marking based on Dynamic Programming.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">pitchmark</a> &gt; pitchmarkdp.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for pitchmark&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>pitchmarkdp
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PITCHMARKDP Pitch marking based on Dynamic Programming.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function pitchmarks = pitchmarkdp(y, fs, plotopt, pmarkParam) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> PITCHMARKDP Pitch marking based on Dynamic Programming.
+   Usage : pitchmarks = pitchmarkdp(y, fs, plotopt, pmarkParam)
+
+   pmarkParam is a struct variable.
+   You can type 'pmarkParam = getpmarkParam(y, fs);' to get this variable.
+   or use 'pmarkParam = getpmarkParam(y, fs, plotopt, SFS_pitchcurve);' to get more precise parameters.
+
+   Selfedemo : pitchmarkdp
+
+ Cheng-Yuan Lin 2004, April, 5</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="getlocation.html" class="code" title="function sampleIndex = getlocation(y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, plotopt)">getlocation</a>	GETLOCATION Find peaks or valleys location to search best pitch marks.</li><li><a href="getpmarkParam.html" class="code" title="function  pmarkParam = getpmarkParam(y, fs, plotopt, SFS_pitchcurve)">getpmarkParam</a>	GETPMARKPARAM Get parameters for pitch marking function.</li><li><a href="plotpitchmarks.html" class="code" title="function plotpitchmarks(y, fs, pitchmarks, SFS_pitchcurve, AXISsetting1, AXISsetting2)">plotpitchmarks</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function probmatrix = getstateprob(y, sampleIndex)</a></li><li><a href="#_sub2" class="code">function pmarkdp = rundp(probmatrix, sampleIndex, SFS_pitchcurve, fs)</a></li><li><a href="#_sub3" class="code">function selfdemo</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function pitchmarks = pitchmarkdp(y, fs, plotopt, pmarkParam)</a>
+0002 <span class="comment">% PITCHMARKDP Pitch marking based on Dynamic Programming.</span>
+0003 <span class="comment">%   Usage : pitchmarks = pitchmarkdp(y, fs, plotopt, pmarkParam)</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%   pmarkParam is a struct variable.</span>
+0006 <span class="comment">%   You can type 'pmarkParam = getpmarkParam(y, fs);' to get this variable.</span>
+0007 <span class="comment">%   or use 'pmarkParam = getpmarkParam(y, fs, plotopt, SFS_pitchcurve);' to get more precise parameters.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%   Selfedemo : pitchmarkdp</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Cheng-Yuan Lin 2004, April, 5</span>
+0012 
+0013 <span class="keyword">if</span> nargin == 0, <a href="#_sub3" class="code" title="subfunction selfdemo">selfdemo</a>; <span class="keyword">return</span>; <span class="keyword">end</span>;
+0014 <span class="keyword">if</span> nargin &lt;4, pmarkParam = <a href="getpmarkParam.html" class="code" title="function  pmarkParam = getpmarkParam(y, fs, plotopt, SFS_pitchcurve)">getpmarkParam</a>(y, fs); <span class="keyword">end</span>;
+0015 
+0016 <span class="comment">%Setting Parameters.</span>
+0017 meanPitch = pmarkParam.meanPitch;
+0018 maxPeriod = pmarkParam.maxPeriod;
+0019 minPeriod = pmarkParam.minPeriod;
+0020 candNum = pmarkParam.candNum;
+0021 PorV = pmarkParam.PorV;
+0022 SFS_pitchcurve = pmarkParam.pitchcurve;
+0023 
+0024 <span class="comment">%Main Program.</span>
+0025 sampleIndex = <a href="getlocation.html" class="code" title="function sampleIndex = getlocation(y, fs, pitch, candNum, PorV, maxPeriod, minPeriod, plotopt)">getlocation</a>(y, fs, meanPitch, candNum, PorV, maxPeriod, minPeriod, 0);
+0026 probmatrix  = <a href="#_sub1" class="code" title="subfunction probmatrix = getstateprob(y, sampleIndex)">getstateprob</a>(y, sampleIndex);
+0027 pitchmarks  = <a href="#_sub2" class="code" title="subfunction pmarkdp = rundp(probmatrix, sampleIndex, SFS_pitchcurve, fs)">rundp</a>(probmatrix, sampleIndex, SFS_pitchcurve, fs);
+0028 
+0029 <span class="keyword">if</span> plotopt,   
+0030    <a href="plotpitchmarks.html" class="code" title="function plotpitchmarks(y, fs, pitchmarks, SFS_pitchcurve, AXISsetting1, AXISsetting2)">plotpitchmarks</a>(y, fs, pitchmarks, SFS_pitchcurve);
+0031 <span class="keyword">end</span>;
+0032 
+0033 <span class="comment">% ============================================================ %</span>
+0034 <span class="comment">%                Sub function: getstateprob                    %</span>
+0035 <span class="comment">% ============================================================ %</span>
+0036 <a name="_sub1" href="#_subfunctions" class="code">function probmatrix = getstateprob(y, sampleIndex)</a>
+0037 row = size(sampleIndex, 1);
+0038 col = size(sampleIndex, 2);
+0039 probmatrix = ones(row, col);
+0040 dist = zeros(1, row);  <span class="comment">%dist is from 0 ~ 2, and prob is from 1 ~ 0.</span>
+0041 scale = 1;
+0042 <span class="keyword">for</span> c = 1 : col,
+0043    dist(2:3) = y(sampleIndex(2:<span class="keyword">end</span>, c)) - y(sampleIndex(1, c));
+0044    dist(2:3) = dist(2:3)*scale;
+0045    prob = 1-abs(dist/2);
+0046    probmatrix(:, c) = log10(prob)';
+0047    <span class="comment">%probmatrix(:, c) = prob';</span>
+0048 <span class="keyword">end</span>;
+0049 
+0050 <span class="comment">% ============================================================ %</span>
+0051 <span class="comment">%                   Sub function: rundp                        %</span>
+0052 <span class="comment">% ============================================================ %</span>
+0053 <a name="_sub2" href="#_subfunctions" class="code">function pmarkdp = rundp(probmatrix, sampleIndex, SFS_pitchcurve, fs)</a>
+0054 row = size(sampleIndex, 1);
+0055 col = size(sampleIndex, 2);
+0056 Indexmatrix = ones(row, col);
+0057 maxDist = mean(SFS_pitchcurve);
+0058 
+0059 <span class="comment">%®t¤@­Ópitch points</span>
+0060 <span class="keyword">if</span> (length(SFS_pitchcurve) == col-1 ), SFS_pitchcurve = [SFS_pitchcurve SFS_pitchcurve(end)]; <span class="keyword">end</span>;
+0061 <span class="keyword">if</span> col &gt; length(SFS_pitchcurve), col = length(SFS_pitchcurve); <span class="keyword">end</span>;
+0062 
+0063 <span class="keyword">for</span> c = 1 : col-1,
+0064    <span class="keyword">for</span> r = 1 : row,
+0065       temp = sampleIndex(r, c+1) - sampleIndex(:, c);
+0066       pitch = fs./temp;
+0067       <span class="comment">%®Ú¾Úpitch curveºâ¥X»P¥Ø«epitchªº¾÷²v­È</span>
+0068       <span class="comment">%logprob = -(abs(temp-SFS_pitchcurve(c+1))./temp);</span>
+0069 
+0070       dist = abs(pitch - SFS_pitchcurve(c+1));
+0071       dist(find(dist&gt;maxDist)) = maxDist;
+0072       prob = -(dist/maxDist)+1;
+0073       logprob = log10(prob)';
+0074       <span class="comment">%logprob = prob';</span>
+0075 
+0076       logprob = logprob + probmatrix(:, c)';
+0077       [cumvalue, index] = max(logprob);
+0078 
+0079       probmatrix(r, c+1) = probmatrix(r, c+1) + cumvalue;
+0080       Indexmatrix(r, c+1) = index;
+0081    <span class="keyword">end</span>;
+0082 <span class="keyword">end</span>;
+0083 
+0084 <span class="comment">%Back tracking.</span>
+0085 backIndex = ones(1, col); <span class="comment">%backIndex¬ö¿ýªº¬O«e¤@­Óindexªº­È, ¨Ò¦pIndexmatrix ²Ä17¦æ¬ö¿ýªº¬O ²Ä16­Ópamrkªºindex</span>
+0086 pmarkdp   = ones(1, col);
+0087 [junk, backIndex(end)] = max(probmatrix(:,end));
+0088 pmarkdp(end) = sampleIndex(backIndex(end), end);
+0089 <span class="keyword">for</span> k = col-1 : -1 : 1,
+0090    pmarkdp(k) = sampleIndex(backIndex(k+1), k);
+0091    backIndex(k) = Indexmatrix(backIndex(k+1), k);
+0092 <span class="keyword">end</span>;
+0093 
+0094 <span class="comment">% ============================================================== %</span>
+0095 <span class="comment">% selfdemo</span>
+0096 <span class="comment">% ============================================================== %</span>
+0097 <a name="_sub3" href="#_subfunctions" class="code">function selfdemo</a>
+0098 [y, fs] = wavread(<span class="string">'la.wav'</span>); y = y(4000:7400);
+0099 <span class="comment">%[y, fs] = wavread('E:\ProgramCode\DataSet\TTS_wavedata\CSWaveFiles\11021.wav');</span>
+0100 plotopt = 1;
+0101 pmarkParam = <a href="getpmarkParam.html" class="code" title="function  pmarkParam = getpmarkParam(y, fs, plotopt, SFS_pitchcurve)">getpmarkParam</a>(y, fs, plotopt);
+0102 pitchmarks = feval(mfilename, y, fs, plotopt, pmarkParam);</pre></div>
+<hr><address>Generated on Tue 21-Aug-2007 22:52:24 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

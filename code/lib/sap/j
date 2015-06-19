@@ -1,0 +1,12 @@
+waveCurve4cooledit.m:function waveAndCurve4cooledit(wObj, curve, frameRate, outWaveFile)
+waveCurve4cooledit.m:% waveAndCurve4cooledit: Create wave and its line (e.g., pitch or novelty curve) for visualization in cooledit.
+waveCurve4cooledit.m:%		waveAndCurve4cooledit(wObj, curve, frameRate)
+waveCurve4cooledit.m:%		waveAndCurve4cooledit(wObj, curve, frameRate, outWaveFile)
+waveCurve4cooledit.m:%		waveAndCurve4cooledit(wObj, curve, frameRate) create a temp wave file with the left channel as the wave and the right channel as the curve (e.g., pitch or novelty) that are easily visualized in cooledit.
+waveCurve4cooledit.m:%		waveAndCurve4cooledit(wObj, curve, frameRate, waveFile) saves the result to waveFile.
+waveCurve4cooledit.m:%		waveAndCurve4cooledit(wObj, pitch, frameRate);
+waveCurve4cooledit.m:% Read a wav file, perform pitch tracking, display the signals and the pitch in cooledit
+waveCurve4cooledit.m:dos(['start ', outWaveFile]);		% Start the wav file using cooledit
+waveWithPitchCurve.m:% waveWithPitchCurve: Read a wav file, perform pitch tracking, display the signals and the pitch in cooledit
+waveWithPitchCurve.m:scaledPitch=0.8*(newPitch-min(newPitch))/(max(newPitch)-min(newPitch));	% The max pitch is 0.8 for display within cooledit
+waveWithPitchCurve.m:	dos(['start ', outWaveFile]);		% Start the wav file using cooledit

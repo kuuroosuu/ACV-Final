@@ -1,0 +1,20 @@
+nsdf2pitch.m:% ====== Greater than PP.clarityTh
+nsdf2pitch.m:index=find(lmaxValue2>=PP.clarityTh);
+nsdf2pitch.m:	line([1, length(pf)], PP.clarityTh*[1, 1], 'color', 'r');
+pitchTracking.m:		if ptPrm.clarityThresholding
+pitchTracking.m:			clarityTh=ptPrm.clarityRatio*max(clarity);
+pitchTracking.m:			pitch(clarity<clarityTh)=0;
+pitchTracking.m:clarityTh=ptPrm.clarityRatio*maxClarity;
+pitchTracking.m:%fprintf('maxClarity=%f, clarityTh=%f\n', max(clarity), clarityTh);
+pitchTracking.m:%pitch=pitch.*(clarity>clarityTh);
+pitchTracking.m:	if ptPrm.clarityThresholding, plotNum=plotNum+1; end
+pitchTracking.m:	if ptPrm.clarityThresholding
+pitchTracking_b.m:clarityTh=ptPrm.clarityRatio*maxClarity;
+pitchTracking_b.m:%fprintf('maxClarity=%f, clarityTh=%f\n', max(clarity), clarityTh);
+pitchTracking_b.m:%pitch=pitch.*(clarity>clarityTh);
+pitchTracking_b.m:%	line([min(frameTime), max(frameTime)], clarityTh*[1 1], 'color', 'r');
+ptPrmSet.m:ptPrm.clarityTh=0.5;		% k for nsdf
+ptPrmSet.m:ptPrm.clarityThresholding=1;
+ptPrmSet.m:ptPrm.clarityRatio=0.5;			% Effective only when clarityThresholding=1
+wave2pitchByNsdf.m:pitch(clarity<PP.clarityTh)=0;
+wave2pitchByNsdf.m:	line([min(frameTime), max(frameTime)], PP.clarityTh*[1 1], 'color', 'r'); title('Clarity');

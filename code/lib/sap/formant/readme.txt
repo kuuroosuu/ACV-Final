@@ -1,0 +1,1 @@
+直接在command line下輸入 "getfrmnt"

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plotpitchmarks</title>
+  <meta name="keywords" content="plotpitchmarks">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">pitchmark</a> &gt; plotpitchmarks.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for pitchmark&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>plotpitchmarks
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function plotpitchmarks(y, fs, pitchmarks, SFS_pitchcurve, AXISsetting1, AXISsetting2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="pitchmarkMAX.html" class="code" title="function pitchmarks = pitchmarkMAX(y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt)">pitchmarkMAX</a>	PITCHMARKMAX Pitch Mark</li><li><a href="pitchmarkMIN.html" class="code" title="function pitchmarks = pitchmarkMIN(y, fs, maxPeriod, minPeriod, SFS_pitchcurve, plotopt)">pitchmarkMIN</a>	PITCHMARKMIN Pitch Mark MIN</li><li><a href="pitchmarkdp.html" class="code" title="function pitchmarks = pitchmarkdp(y, fs, plotopt, pmarkParam)">pitchmarkdp</a>	PITCHMARKDP Pitch marking based on Dynamic Programming.</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function plotpitchmarks(y, fs, pitchmarks, SFS_pitchcurve, AXISsetting1, AXISsetting2)</a>
+0002 
+0003 Marks_pitchcurve = (fs./diff(pitchmarks))'; <span class="comment">%row-based vector.</span>
+0004 
+0005 <span class="keyword">if</span> nargin&lt;5,
+0006    AXISsetting1 = <span class="string">'tight'</span>;   
+0007    MAXpitch = max([Marks_pitchcurve; SFS_pitchcurve])+20;  <span class="comment">%Unit : Hz</span>
+0008    MINpitch = min([Marks_pitchcurve; SFS_pitchcurve])-20;  <span class="comment">%Unit : Hz</span>
+0009    Curvelength = max([length(Marks_pitchcurve) length(SFS_pitchcurve)]);
+0010    AXISsetting2 = [1 Curvelength MINpitch MAXpitch];
+0011 <span class="keyword">end</span>;
+0012 
+0013 figure(<span class="string">'position'</span>, [-3 43 1280 646]);
+0014 <span class="comment">% ==================================================================== %</span>
+0015 subplot(2,1,1);
+0016 plot((1:length(y)), y, <span class="string">'.-'</span>);
+0017 <span class="keyword">for</span> i=1:length(pitchmarks),
+0018    line(pitchmarks(i), y(pitchmarks(i)), <span class="string">'marker'</span>, <span class="string">'o'</span>, <span class="string">'color'</span>, <span class="string">'r'</span>, <span class="string">'linewidth'</span>, 1.6);
+0019 <span class="keyword">end</span>
+0020 ylabel(<span class="string">'Amplitude'</span>); title(<span class="string">'Wave form'</span>); legend(<span class="string">'Wave'</span>,<span class="string">'Pitch marks'</span>);
+0021 axis(AXISsetting1);
+0022 
+0023 <span class="comment">% ==================================================================== %</span>
+0024 subplot(2,1,2);
+0025 <span class="keyword">if</span> length(SFS_pitchcurve) &gt; length(Marks_pitchcurve),
+0026    SFS_pitchcurve = SFS_pitchcurve(1: length(Marks_pitchcurve));
+0027 <span class="keyword">else</span>
+0028    SFS_pitchcurve = scalevector(SFS_pitchcurve, length(Marks_pitchcurve))'; <span class="comment">%row-based vector</span>
+0029 <span class="keyword">end</span>;
+0030 A = plot(SFS_pitchcurve, <span class="string">'ro-'</span>); set(A, <span class="string">'linewidth'</span>, 1.6);
+0031 hold on; A = plot(Marks_pitchcurve, <span class="string">'bx-'</span>); set(A, <span class="string">'linewidth'</span>, 1.6);
+0032 RMSE = sqrt(mean(abs(Marks_pitchcurve - SFS_pitchcurve).^2));
+0033 title([<span class="string">'RMSE of SFS-pitch and Marks-pitch is: '</span> num2str(RMSE) <span class="string">' (Hz).'</span>]);
+0034 ylabel(<span class="string">'Frequency (Hz)'</span>); xlabel(<span class="string">'Frame Index (10 ms)'</span>);
+0035 legend(<span class="string">'Pitch curve estimated by using Speech Filing System software (SFS-pitch)'</span>, <span class="string">'Pitch curve estimated directly by using distance of pitch marks (Marks-pitch)'</span>, 2);
+0036 axis(AXISsetting2);</pre></div>
+<hr><address>Generated on Tue 21-Aug-2007 22:52:24 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

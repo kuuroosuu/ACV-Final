@@ -1,0 +1,19 @@
+userDataVariables={
+	'y',
+	'fs',
+	'nbits',
+	'axes1H',
+	'axes2H',
+	'axes3H',
+	'axes4H',
+	'waveBarH',
+	'volBarH',
+	'zcrBarH',
+	'epByHand',
+	'epByComputer',
+	'voicedH',
+	'voicedIndex',
+	'endPointList',
+	'waveFile',
+	'endPointFile'
+	};

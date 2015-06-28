@@ -1,5 +1,7 @@
 function AMST( fileName )
 
+close all
+clc
 addpath ../lib/sap
 if ~exist('fileName','var'), fileName = '../media/img2.jpg'; end
 
@@ -10,11 +12,21 @@ imshow(oriImg)
 
 % Convert to binary image
 if size(size(oriImg),2) == 3
+    disp('3 Channel image')
     biImg = rgb2gray(oriImg);
 else
+    disp('2 Channel image')
     biImg = oriImg;
 end
-biImg = biImg>128;
+maxPxl = max(max(biImg));
+if maxPxl<10, disp('0/1 image'); end
+biImg = double(biImg)/double(maxPxl);
+tbiImg = biImg<0.5;
+if sum(sum(tbiImg))>size(biImg,1)*size(biImg,2)/2
+    disp('Reverse image')
+    biImg = 1-biImg; 
+end
+biImg = biImg>0.6;
 
 % Find histogram to find horizontal line 
 imgHistogram = sum(1-biImg');
@@ -91,6 +103,7 @@ if ~confirmSpace
         end
     end
 end
+confirmSpace = ceil(confirmSpace);
 
 % Mend the lines if the number of lines in the clusters are less than 5
 for i = 1 : length(scoreLines)
@@ -99,14 +112,16 @@ for i = 1 : length(scoreLines)
         lineAddPos = [];
         for j = 1 : length(scoreLines{i})
             for k = 1 : 4
-                [lnMax, lnMaxIdx] = max(imgHistogram(scoreLines{i}(j)+k*confirmSpace-2) : ...
-                    imgHistogram(scoreLines{i}(j)+k*confirmSpace+2));
+                bIdx = max(scoreLines{i}(j)+k*confirmSpace-2, 1);
+                eIdx = min(scoreLines{i}(j)+k*confirmSpace+2, length(imgHistogram));
+                [lnMax, lnMaxIdx] = max(imgHistogram(bIdx:eIdx));
                 lineAddVal = [lineAddVal lnMax];
-                lineAddPos = [lineAddPos scoreLines{i}(j)+k*confirmSpace-3+lnMaxIdx];
-                [lnMax, lnMaxIdx] = max(imgHistogram(scoreLines{i}(j)-k*confirmSpace-2) : ...
-                    imgHistogram(scoreLines{i}(j)-k*confirmSpace+2));
+                lineAddPos = [lineAddPos bIdx-1+lnMaxIdx];
+                bIdx = max(scoreLines{i}(j)-k*confirmSpace-2, 1);
+                eIdx = min(scoreLines{i}(j)-k*confirmSpace+2, length(imgHistogram));
+                [lnMax, lnMaxIdx] = max(imgHistogram(bIdx:eIdx));
                 lineAddVal = [lineAddVal lnMax];
-                lineAddPos = [lineAddPos scoreLines{i}(j)-k*confirmSpace-3+lnMaxIdx];
+                lineAddPos = [lineAddPos bIdx-1+lnMaxIdx];
             end
         end
         [lineAddVal, lineAddValIdx] = sort(lineAddVal, 'descend');
@@ -124,7 +139,7 @@ for i = 1 : length(scoreLines)
         end
     end
 end
-imshow(oriImg)
+imshow(biImg)
 hold on
 for i = 1 : length(scoreLines)
     lines = scoreLines{i};
@@ -133,19 +148,22 @@ for i = 1 : length(scoreLines)
     end
 end
 hold off
+% pause
 
 % Remove score line
 imgAfterRemoveScoreLine = biImg;
 for i = 1 : length(scoreLines)
     for j = 1 : 5
-        notePreserve = biImg(scoreLines{i}(j)-2:scoreLines{i}(j)+2,:);
+        bIdx = max(scoreLines{i}(j)-2,1);
+        eIdx = min(scoreLines{i}(j)+2,size(biImg,1));
+        notePreserve = biImg(bIdx:eIdx,:);
         notePreserve = sum(notePreserve);
-        notePreserve = notePreserve>=3;
-        rep = zeros(5,size(notePreserve,2));
-        for k = 1 : 5
+        notePreserve = notePreserve>=(eIdx-bIdx+1)*0.3;
+        rep = zeros(eIdx-bIdx+1,size(notePreserve,2));
+        for k = 1 : eIdx-bIdx+1
             rep(k,:) = notePreserve;
         end
-        imgAfterRemoveScoreLine(scoreLines{i}(j)-2:scoreLines{i}(j)+2,:) = rep;
+        imgAfterRemoveScoreLine(bIdx:eIdx,:) = rep;
     end
 end
 imshow(imgAfterRemoveScoreLine)
@@ -185,7 +203,9 @@ for i = 1 : length(locs)
         [mverLineVal, mverLineValIdx] = max(tverLineHis);
         if ~mverLineVal, break; end
         trueVerLine(mverLineValIdx) = 1;
-        tverLineHis(mverLineValIdx-5:mverLineValIdx+5) = 0;
+        bIdx = max(mverLineValIdx-5,1);
+        eIdx = min(mverLineValIdx+5,length(tverLineHis));
+        tverLineHis(bIdx:eIdx) = 0;
     end
     verLine = find(trueVerLine==1);
     
